@@ -24,18 +24,18 @@ api = Api(app)
 db = init_database(app)
 
 
-@app.errorhandler(Exception)
-def handle_exception(error):
-    response = Response()
-    response.data = json.dumps(
-        {
-            "code": 500,
-            "name": "Internal server error",
-        }
-    )
-    response.status_code = 500
-    response.content_type = "application/json"
-    return response
+# @app.errorhandler(Exception)
+# def handle_exception(error):
+#     response = Response()
+#     response.data = json.dumps(
+#         {
+#             "code": 500,
+#             "name": "Internal server error",
+#         }
+#     )
+#     response.status_code = 500
+#     response.content_type = "application/json"
+#     return response
 
 
 migrate = Migrate(app, db)
