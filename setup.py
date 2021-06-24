@@ -17,6 +17,8 @@ setup(
         "flask-migrate",
         "psycopg2-binary",
         "flask-sqlalchemy",
+        "flask-jwt-extended",
+        "bcrypt",
     ],
     entry_points={
         "console_scripts": [
