@@ -29,7 +29,7 @@ def populate_db():
         timestamp=timestamp,
         username="TestUsername2",
         password=password,
-        user_role="user",
+        user_role="admin",
         name="TestName2",
         surname="TestSurname2",
         email="TestEmail2",
@@ -60,7 +60,14 @@ def client():
 
 
 def test_get_users_happy(client):
-    result = client.get("/user")
+    # first log in as admin
+    login_data = {"username": "TestUsername2", "password": "TestPassword1"}
+    token = client.post(
+        "/login", data=json.dumps(login_data), content_type="application/json"
+    ).json
+    headers = {"Authorization": f"Bearer {token}"}
+    result = client.get("/user", headers=headers)
+    assert result.status_code == 200
     assert len(result.json) == 2
 
 
@@ -80,7 +87,7 @@ def test_create_user_happy(client):
     result = client.post(
         "/user", data=json.dumps(new_user), content_type="application/json"
     )
-    print(result.json)
+    assert result.status_code == 200
     assert result.json["username"] == new_user["username"]
     assert (
         result.json["user_role"] == "user"
@@ -117,6 +124,12 @@ def test_create_user_sad(client):
 
 
 def test_update_user_happy(client):
+    # first log in
+    login_data = {"username": "TestUsername1", "password": "TestPassword1"}
+    token = client.post(
+        "/login", data=json.dumps(login_data), content_type="application/json"
+    ).json
+    headers = {"Authorization": f"Bearer {token}"}
     changed_user = {
         "id": 1,
         "username": "TestUsername1",
@@ -124,22 +137,25 @@ def test_update_user_happy(client):
         "surname": "TestSurname2",
     }
     result = client.put(
-        "/user", data=json.dumps(changed_user), content_type="application/json"
+        "/user",
+        data=json.dumps(changed_user),
+        headers=headers,
+        content_type="application/json",
     )
+    assert result.status_code == 200
     assert result.json["name"] == changed_user["name"]
     assert result.json["surname"] == changed_user["surname"]
 
 
 def test_update_user_sad(client):
-    # try to change username, which is forbidden
+    # try to change user while not logged in, which is forbidden
     changed_user = {
-        "id": 1,
-        "username": "ChangedUsername",
+        "name": "ChangedName",
     }
     result = client.put(
         "/user", data=json.dumps(changed_user), content_type="application/json"
     )
-    assert result.json["username"] == "TestUsername1"
+    assert result.status_code == 401
 
 
 def test_login_happy(client):
@@ -161,33 +177,60 @@ def test_login_sad(client):
 
 
 def test_delete_user_happy(client):
-    result = client.delete("/user/1")
+    # first log in
+    login_data = {"username": "TestUsername1", "password": "TestPassword1"}
+    token = client.post(
+        "/login", data=json.dumps(login_data), content_type="application/json"
+    ).json
+    headers = {"Authorization": f"Bearer {token}"}
+    result = client.delete("/user", headers=headers)
     assert result.status_code == 200
     assert result.json["deleted"]
 
 
 def test_delete_user_sad(client):
-    result = client.delete("/user/1389")
-    assert result.status_code == 404
+    # try to delete without logging in
+    result = client.delete("/user")
+    assert result.status_code == 401
 
 
 def test_ban_user_happy(client):
-    result = client.post("/user/1/ban")
+    # first log in as admin
+    login_data = {"username": "TestUsername2", "password": "TestPassword1"}
+    token = client.post(
+        "/login", data=json.dumps(login_data), content_type="application/json"
+    ).json
+    headers = {"Authorization": f"Bearer {token}"}
+    result = client.post("/user/1/ban", headers=headers)
     assert result.status_code == 200
     assert result.json["banned"]
 
 
 def test_ban_user_sad(client):
-    result = client.post("/user/1389/ban")
+    # first log in as admin
+    login_data = {"username": "TestUsername2", "password": "TestPassword1"}
+    token = client.post(
+        "/login", data=json.dumps(login_data), content_type="application/json"
+    ).json
+    headers = {"Authorization": f"Bearer {token}"}
+    # non existant user id
+    result = client.post("/user/1389/ban", headers=headers)
     assert result.status_code == 404
 
 
 def test_resolve_agent_request_happy(client):
+    # first log in as admin
+    login_data = {"username": "TestUsername2", "password": "TestPassword1"}
+    token = client.post(
+        "/login", data=json.dumps(login_data), content_type="application/json"
+    ).json
+    headers = {"Authorization": f"Bearer {token}"}
     approve_dict = {"approve": True}
     result = client.post(
         "/user/1/agent_request",
         data=json.dumps(approve_dict),
         content_type="application/json",
+        headers=headers,
     )
     assert result.status_code == 200
     assert result.json["user_role"] == "agent"
@@ -195,10 +238,18 @@ def test_resolve_agent_request_happy(client):
 
 
 def test_resolve_agent_request_sad(client):
+    # first log in aas admin
+    login_data = {"username": "TestUsername2", "password": "TestPassword1"}
+    token = client.post(
+        "/login", data=json.dumps(login_data), content_type="application/json"
+    ).json
+    headers = {"Authorization": f"Bearer {token}"}
     approve_dict = {"approve": True}
+    # try to approve a request for a user who doesn't have a pending request
     result = client.post(
         "/user/2/agent_request",
         data=json.dumps(approve_dict),
         content_type="application/json",
+        headers=headers,
     )
     assert result.status_code == 400

@@ -61,9 +61,9 @@ def get_current_user():
             deleted=None,
         )
     token = request.headers.get("Authorization")[7:]
-    user_dict = decode_token(token)["identity"]
+    user_dict = decode_token(token)["sub"]
 
-    user = AppUser.query.filter_by(id=user_dict["id"])
+    user = AppUser.query.filter_by(id=user_dict["id"]).first()
 
     return user
 
