@@ -15,7 +15,7 @@ jobs:
       with:
         repository: ${{ github.repository }}
         excludes: release, draft
-    - name: "Echo output"
+    - name: Echo output
         run: |
           echo "prerelease ${{ steps.release_version.outputs.release }}"
     - name: Docker Build, Tag & Push
