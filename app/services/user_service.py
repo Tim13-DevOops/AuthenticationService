@@ -77,9 +77,12 @@ def update_user(user_dict):
         phone_number: str
         website: str
     """
-    # TODO check if its the user updating himself
     user_dict.pop("username", None)
-    query = AppUser.query.filter_by(id=user_dict["id"])
+    # get the user who sent this request
+    user_from_token = rbac.get_current_user()
+    if not user_from_token.id:
+        abort(400, "No user logged in")
+    query = AppUser.query.filter_by(id=user_from_token.id)
     user = query.first()
     if user is None:
         abort(404, "AppUser not found")
@@ -95,12 +98,14 @@ def update_user(user_dict):
     return user
 
 
-def delete_user(user_id):
-    query = AppUser.query.filter_by(id=user_id)
+def delete_user():
+    user_from_token = rbac.get_current_user()
+    if not user_from_token.id:
+        abort(400, "No user logged in")
+    query = AppUser.query.filter_by(id=user_from_token.id)
     user = query.first()
     if user is None:
         abort(404)
-    # TODO check if its the user deleting himself
     query.update({"deleted": True})
     db.session.commit()
     return user
@@ -128,9 +133,9 @@ def resolve_agent_request(user_id, approve):
     query = AppUser.query.filter_by(id=user_id)
     user = query.first()
     if user is None:
-        abort(404)
+        abort(404, "User not found")
     if not user.agent_request:
-        abort(400)
+        abort(400, "User does not have a pending request to become agent")
     if approve:
         query.update({"user_role": "agent", "agent_request": False})
     else:

@@ -60,6 +60,3 @@ def test_get_token(client):
     assert decoded_token["sub"]["agent_request"] == user.agent_request
     assert decoded_token["sub"]["banned"] == user.banned
     assert decoded_token["sub"]["deleted"] == user.deleted
-
-
-# test get current user, i guess with checking if rbac works

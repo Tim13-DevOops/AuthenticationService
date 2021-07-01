@@ -10,6 +10,7 @@ from flask_migrate import migrate as migrate_migrate
 from flask_migrate import upgrade as migrate_upgrade
 from flask_cors import CORS
 import app.config as config
+from datetime import datetime
 
 # import json
 from app.repository.database import init_database
@@ -48,16 +49,39 @@ migrate = Migrate(app, db)
 from app.api.user_api import (
     UserAPI,
     LoginAPI,
-    SingleUserAPI,
     BanUserAPI,
     ResolveAgentRequestAPI,
 )
+from app.repository.user import AppUser
 
 api.add_resource(UserAPI, "/user")
 api.add_resource(LoginAPI, "/login")
-api.add_resource(SingleUserAPI, "/user/<int:user_id>")
 api.add_resource(BanUserAPI, "/user/<int:user_id>/ban")
 api.add_resource(ResolveAgentRequestAPI, "/user/<int:user_id>/agent_request")
+
+
+def populate_admins():
+    admin_exists = AppUser.query.filter_by(username="dusanpanda").first()
+    if admin_exists:
+        return
+
+    password_hash = rbac.get_hashed_password("dusanko1")
+    user = AppUser(
+        username="dusanpanda",
+        password=password_hash,
+        user_role="admin",
+        timestamp=datetime.now(),
+        name="dusan",
+        surname="panda",
+        email="dusanpanda@gmail.com",
+        phone_number="1238021093",
+        website="www.dusanpanda@gmail.com",
+        agent_request=False,
+        banned=False,
+        deleted=False,
+    )
+    db.session.add(user)
+    db.session.commit()
 
 
 def db_migrate():
@@ -69,6 +93,7 @@ def db_migrate():
 
 
 def main():
+    populate_admins()
     app.run(host="0.0.0.0", debug=True)
 
 

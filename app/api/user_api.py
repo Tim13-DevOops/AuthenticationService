@@ -1,12 +1,17 @@
 from flask_restful import Resource
 from flask import request, jsonify
 
-# from rbac import rbac
 from app.services import user_service
+from app.rbac import rbac
 
 
 class UserAPI(Resource):
-    # method_decorators = [rbac.Allow(['admin'])]
+    method_decorators = {
+        "get": [rbac.Allow(["admin"])],
+        "put": [rbac.Allow(["admin", "user", "agent"])],
+        "delete": [rbac.Allow(["admin", "user", "agent"])],
+    }
+
     def get(self):
         return jsonify(user_service.get_users())
 
@@ -31,6 +36,9 @@ class UserAPI(Resource):
         user = user_service.update_user(user_dict)
         return jsonify(user)
 
+    def delete(self):
+        return jsonify(user_service.delete_user())
+
 
 class LoginAPI(Resource):
     def post(self):
@@ -39,21 +47,21 @@ class LoginAPI(Resource):
             username: str
             password: str
         """
-        token = user_service.login(request.get_json())
+        login_dict = request.get_json()
+        token = user_service.login(login_dict)
         return jsonify(token)
 
 
-class SingleUserAPI(Resource):
-    def delete(self, user_id):
-        return jsonify(user_service.delete_user(user_id))
-
-
 class BanUserAPI(Resource):
+    method_decorators = [rbac.Allow(["admin"])]
+
     def post(self, user_id):
         return jsonify(user_service.ban_user(user_id))
 
 
 class ResolveAgentRequestAPI(Resource):
+    method_decorators = [rbac.Allow(["admin"])]
+
     def post(self, user_id):
         """
         Args:
