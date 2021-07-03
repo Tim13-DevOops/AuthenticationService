@@ -1,6 +1,7 @@
 from datetime import datetime
 from .database import db
 from dataclasses import dataclass
+from app.rbac import rbac
 
 
 @dataclass
@@ -35,3 +36,136 @@ class AppUser(db.Model):
 
     def __repr__(self):
         return f"AppUser {self.username}"
+
+
+def add_user(user):
+    user_exists = AppUser.query.filter_by(username=user.username).first()
+    if user_exists:
+        return
+
+    password_hash = rbac.get_hashed_password(user.password)
+    user.password = password_hash
+    db.session.add(user)
+
+
+def populate_admins():
+
+    users = [
+        AppUser(
+            username="dusanpanda",
+            password="dusanko1",
+            user_role="admin",
+            timestamp=datetime.now(),
+            name="dusan",
+            surname="panda",
+            email="dusanpanda@gmail.com",
+            phone_number="1238021093",
+            website="www.dusanpanda@gmail.com",
+            agent_request=False,
+            banned=False,
+            deleted=False
+        ),
+        AppUser(
+            username="banepanda",
+            password="banko1",
+            user_role="agent",
+            timestamp=datetime.now(),
+            name="bame",
+            surname="panda",
+            email="banepanda@gmail.com",
+            phone_number="1238021094",
+            website="www.banepanda@gmail.com",
+            agent_request=False,
+            banned=False,
+            deleted=False
+        ),
+        AppUser(
+            username="otacpanda",
+            password="branko1",
+            user_role="agent",
+            timestamp=datetime.now(),
+            name="otac",
+            surname="panda",
+            email="otacpanda@gmail.com",
+            phone_number="1238021094",
+            website="www.baepanda@gmail.com",
+            agent_request=False,
+            banned=False,
+            deleted=False
+        ),
+        AppUser(
+            username="user1panda",
+            password="userko1",
+            user_role="user",
+            timestamp=datetime.now(),
+            name="user1",
+            surname="panda",
+            email="user1panda@gmail.com",
+            phone_number="1238021094",
+            website="www.user1panda@gmail.com",
+            agent_request=False,
+            banned=False,
+            deleted=False
+        ),
+        AppUser(
+            username="user2panda",
+            password="userko1",
+            user_role="user",
+            timestamp=datetime.now(),
+            name="user2",
+            surname="panda",
+            email="user2panda@gmail.com",
+            phone_number="1238021094",
+            website="www.user2panda@gmail.com",
+            agent_request=False,
+            banned=False,
+            deleted=False
+        ),
+        AppUser(
+            username="user3panda",
+            password="userko1",
+            user_role="user",
+            timestamp=datetime.now(),
+            name="user3",
+            surname="panda",
+            email="user3panda@gmail.com",
+            phone_number="1238021094",
+            website="www.user3panda@gmail.com",
+            agent_request=False,
+            banned=False,
+            deleted=False
+        ),
+        AppUser(
+            username="user4panda",
+            password="userko1",
+            user_role="user",
+            timestamp=datetime.now(),
+            name="user4",
+            surname="panda",
+            email="user4panda@gmail.com",
+            phone_number="1238021094",
+            website="www.user4panda@gmail.com",
+            agent_request=False,
+            banned=False,
+            deleted=False
+        ),
+        AppUser(
+            username="user5panda",
+            password="userko1",
+            user_role="user",
+            timestamp=datetime.now(),
+            name="user5",
+            surname="panda",
+            email="user5panda@gmail.com",
+            phone_number="1238021094",
+            website="www.user5panda@gmail.com",
+            agent_request=False,
+            banned=False,
+            deleted=False
+        ),
+    ]
+
+    for user in users:
+        add_user(user)
+    db.session.commit()
+

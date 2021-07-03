@@ -21,7 +21,7 @@ app.config["SECRET_KEY"] = config.FLASK_SECRET_KEY
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 
-cors = CORS(app, resources={r"/*": {"origins": "localhost"}})
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 api = Api(app)
 db = init_database(app)
@@ -52,7 +52,7 @@ from app.api.user_api import (
     BanUserAPI,
     ResolveAgentRequestAPI,
 )
-from app.repository.user import AppUser
+from app.repository.user import AppUser, populate_admins
 
 api.add_resource(UserAPI, "/user")
 api.add_resource(LoginAPI, "/login")
@@ -60,28 +60,6 @@ api.add_resource(BanUserAPI, "/user/<int:user_id>/ban")
 api.add_resource(ResolveAgentRequestAPI, "/user/<int:user_id>/agent_request")
 
 
-def populate_admins():
-    admin_exists = AppUser.query.filter_by(username="dusanpanda").first()
-    if admin_exists:
-        return
-
-    password_hash = rbac.get_hashed_password("dusanko1")
-    user = AppUser(
-        username="dusanpanda",
-        password=password_hash,
-        user_role="admin",
-        timestamp=datetime.now(),
-        name="dusan",
-        surname="panda",
-        email="dusanpanda@gmail.com",
-        phone_number="1238021093",
-        website="www.dusanpanda@gmail.com",
-        agent_request=False,
-        banned=False,
-        deleted=False,
-    )
-    db.session.add(user)
-    db.session.commit()
 
 
 def db_migrate():
