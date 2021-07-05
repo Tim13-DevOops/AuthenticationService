@@ -20,12 +20,6 @@ class UserAPI(Resource):
         user_dict:
             username: str
             password: str
-            user_role: 'user' or 'agent'
-            name: str
-            surname: str
-            email: str
-            phone_number: str
-            website: str
         """
         user_dict = request.get_json()
         user = user_service.register(user_dict)

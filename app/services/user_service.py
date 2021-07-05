@@ -22,22 +22,21 @@ def register(user_dict):
         username: str
         password: str
         user_role: 'user' or 'agent'
-        name: str
-        surname: str
-        email: str
-        phone_number: str
-        website: str
     """
     user_dict.pop("id", None)
-    user_dict.pop("agent_request", None)
     password = user_dict.pop("password", None)
     username = user_dict["username"]
-    agent_request = user_dict.pop("user_role", "user") == "agent"
     if username_exists(username):
         abort(400, "Username taken")
     # user is always first registered as user role, but can have a request
     # to become an agent
-    user = AppUser(user_role="user", agent_request=agent_request, **user_dict)
+    user = AppUser(
+        user_role="user",
+        agent_request=False,
+        banned=False,
+        deleted=False,
+        **user_dict,
+    )
     user.timestamp = datetime.now()
 
     password_hash = rbac.get_hashed_password(password)
@@ -70,14 +69,10 @@ def update_user(user_dict):
     user_dict (only contains fields which should be changed):
         id: int
         password: str
-        user_role: 'user' or 'agent'
-        name: str
-        surname: str
-        email: str
-        phone_number: str
-        website: str
+        agent_request: True or False
     """
     user_dict.pop("username", None)
+    user_dict.pop("user_role", None)
     # get the user who sent this request
     user_from_token = rbac.get_current_user()
     if not user_from_token.id:
@@ -88,10 +83,8 @@ def update_user(user_dict):
         abort(404, "AppUser not found")
     if "password" in user_dict:
         user_dict["password"] = rbac.get_hashed_password(user_dict["password"])
-    if not user.agent_request:
-        user_dict["agent_request"] = (
-            user_dict.pop("user_role", "user") == "agent"
-        )
+    if user_dict.get("agent_request", None) and user.role != "user":
+        user_dict["agent_request"] = False
 
     query.update(user_dict)
     db.session.commit()
@@ -112,7 +105,6 @@ def delete_user():
 
 
 def ban_user(user_id):
-    # TODO add rback
     query = AppUser.query.filter_by(id=user_id)
     user = query.first()
     if user is None:
