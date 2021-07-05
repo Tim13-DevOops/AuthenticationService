@@ -15,11 +15,6 @@ def populate_db():
         username="TestUsername1",
         password=password,
         user_role="user",
-        name="TestName1",
-        surname="TestSurname1",
-        email="TestEmail1",
-        phone_number="TestPhoneNumber1",
-        website="TestWebsite1",
         agent_request=True,
         banned=False,
         deleted=False,
@@ -30,11 +25,6 @@ def populate_db():
         username="TestUsername2",
         password=password,
         user_role="admin",
-        name="TestName2",
-        surname="TestSurname2",
-        email="TestEmail2",
-        phone_number="TestPhoneNumber2",
-        website="TestWebsite2",
         agent_request=False,
         banned=False,
         deleted=False,
@@ -75,14 +65,6 @@ def test_create_user_happy(client):
     new_user = {
         "username": "TestUsername3",
         "password": "TestPassword3",
-        "user_role": "agent",
-        "name": "TestName3",
-        "surname": "TestSurname3",
-        "email": "TestEmail3",
-        "phone_number": "TestPhoneNumber3",
-        "website": "TestWebsite3",
-        "banned": False,
-        "deleted": False,
     }
     result = client.post(
         "/user", data=json.dumps(new_user), content_type="application/json"
@@ -92,14 +74,9 @@ def test_create_user_happy(client):
     assert (
         result.json["user_role"] == "user"
     )  # the user is of type user, but there is a request to make him an agent
-    assert result.json["name"] == new_user["name"]
-    assert result.json["surname"] == new_user["surname"]
-    assert result.json["email"] == new_user["email"]
-    assert result.json["phone_number"] == new_user["phone_number"]
-    assert result.json["website"] == new_user["website"]
-    assert result.json["agent_request"]
-    assert result.json["banned"] == new_user["banned"]
-    assert result.json["deleted"] == new_user["deleted"]
+    assert not result.json["agent_request"]
+    assert not result.json["banned"]
+    assert not result.json["deleted"]
 
 
 def test_create_user_sad(client):
@@ -107,15 +84,6 @@ def test_create_user_sad(client):
     new_user = {
         "username": "TestUsername1",
         "password": "TestPassword2",
-        "user_role": "user",
-        "name": "TestName2",
-        "surname": "TestSurname2",
-        "email": "TestEmail2",
-        "phone_number": "TestPhoneNumber2",
-        "website": "TestWebsite2",
-        "agent_request": False,
-        "banned": False,
-        "deleted": False,
     }
     result = client.post(
         "/user", data=json.dumps(new_user), content_type="application/json"
@@ -132,9 +100,7 @@ def test_update_user_happy(client):
     headers = {"Authorization": f"Bearer {token}"}
     changed_user = {
         "id": 1,
-        "username": "TestUsername1",
-        "name": "TestName2",
-        "surname": "TestSurname2",
+        "password": "NewPassword",
     }
     result = client.put(
         "/user",
@@ -143,15 +109,11 @@ def test_update_user_happy(client):
         content_type="application/json",
     )
     assert result.status_code == 200
-    assert result.json["name"] == changed_user["name"]
-    assert result.json["surname"] == changed_user["surname"]
 
 
 def test_update_user_sad(client):
     # try to change user while not logged in, which is forbidden
-    changed_user = {
-        "name": "ChangedName",
-    }
+    changed_user = {"Password": "NewPassword"}
     result = client.put(
         "/user", data=json.dumps(changed_user), content_type="application/json"
     )

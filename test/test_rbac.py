@@ -36,11 +36,6 @@ def test_get_token(client):
         username="TestUsername1",
         password=password,
         user_role="user",
-        name="TestName1",
-        surname="TestSurname1",
-        email="TestEmail1",
-        phone_number="TestPhoneNumber1",
-        website="TestWebsite1",
         agent_request=True,
         banned=False,
         deleted=False,
@@ -52,11 +47,6 @@ def test_get_token(client):
     assert decoded_token["sub"]["timestamp"] is not None
     assert decoded_token["sub"]["username"] == user.username
     assert decoded_token["sub"]["user_role"] == user.user_role
-    assert decoded_token["sub"]["name"] == user.name
-    assert decoded_token["sub"]["surname"] == user.surname
-    assert decoded_token["sub"]["email"] == user.email
-    assert decoded_token["sub"]["phone_number"] == user.phone_number
-    assert decoded_token["sub"]["website"] == user.website
     assert decoded_token["sub"]["agent_request"] == user.agent_request
     assert decoded_token["sub"]["banned"] == user.banned
     assert decoded_token["sub"]["deleted"] == user.deleted
