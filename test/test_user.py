@@ -5,6 +5,7 @@ from app.repository.database import db
 from app.repository.user import AppUser
 from datetime import datetime
 from app.rbac.rbac import get_hashed_password
+import requests_mock
 
 
 def populate_db():
@@ -62,21 +63,25 @@ def test_get_users_happy(client):
 
 
 def test_create_user_happy(client):
-    new_user = {
-        "username": "TestUsername3",
-        "password": "TestPassword3",
-    }
-    result = client.post(
-        "/user", data=json.dumps(new_user), content_type="application/json"
-    )
-    assert result.status_code == 200
-    assert result.json["username"] == new_user["username"]
-    assert (
-        result.json["user_role"] == "user"
-    )  # the user is of type user, but there is a request to make him an agent
-    assert not result.json["agent_request"]
-    assert not result.json["banned"]
-    assert not result.json["deleted"]
+    with requests_mock.Mocker() as mocker:
+        mocker.post(
+            "http://api_gateway:8000/user_profile/user_profile", status_code=200
+        )
+        new_user = {
+            "username": "TestUsername3",
+            "password": "TestPassword3",
+        }
+        result = client.post(
+            "/user", data=json.dumps(new_user), content_type="application/json"
+        )
+        assert result.status_code == 200
+        assert result.json["username"] == new_user["username"]
+        assert (
+            result.json["user_role"] == "user"
+        )  # the user is of type user, but there is a request to make him an agent
+        assert not result.json["agent_request"]
+        assert not result.json["banned"]
+        assert not result.json["deleted"]
 
 
 def test_create_user_sad(client):

@@ -19,6 +19,8 @@ setup(
         "flask-sqlalchemy",
         "flask-jwt-extended",
         "bcrypt",
+        "requests-mock",
+        "requests",
     ],
     entry_points={
         "console_scripts": [

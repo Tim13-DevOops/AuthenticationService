@@ -3,6 +3,7 @@ from flask import abort
 from app.repository.user import AppUser
 from app.repository.database import db
 import app.rbac.rbac as rbac
+import requests
 
 
 def get_users():
@@ -41,10 +42,17 @@ def register(user_dict):
 
     password_hash = rbac.get_hashed_password(password)
     user.password = password_hash
-
-    db.session.add(user)
-    db.session.commit()
-    return user
+    r = requests.post(
+        "http://api_gateway:8000/user_profile/user_profile",
+        json={"username": user.username},
+    )
+    if r.status_code == 200:
+        db.session.add(user)
+        db.session.commit()
+        return user
+    else:
+        db.session.rollback()
+        r.raise_for_status()
 
 
 def login(login_dict):
