@@ -21,6 +21,8 @@ setup(
         "bcrypt",
         "requests-mock",
         "requests",
+        "prometheus-flask-exporter",
+        "flask",
     ],
     entry_points={
         "console_scripts": [

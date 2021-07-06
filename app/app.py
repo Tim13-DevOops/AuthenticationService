@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask
+from flask import Flask, make_response
 
 # from flask.wrappers import Response
 from flask_restful import Api
@@ -10,7 +10,9 @@ from flask_migrate import migrate as migrate_migrate
 from flask_migrate import upgrade as migrate_upgrade
 from flask_cors import CORS
 import app.config as config
-from datetime import datetime
+from prometheus_flask_exporter import RESTfulPrometheusMetrics
+
+from app.custom_api import CustomApi
 
 # import json
 from app.repository.database import init_database
@@ -23,8 +25,9 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
-api = Api(app)
+api = CustomApi(app)
 db = init_database(app)
+metrics = RESTfulPrometheusMetrics(app, api)
 
 from app.rbac import rbac
 
@@ -58,6 +61,20 @@ api.add_resource(UserAPI, "/user")
 api.add_resource(LoginAPI, "/login")
 api.add_resource(BanUserAPI, "/user/<int:user_id>/ban")
 api.add_resource(ResolveAgentRequestAPI, "/user/<int:user_id>/agent_request")
+
+from app.prometheus_metrics.prometheus_metrics import (
+    init_metrics,
+)
+
+init_metrics()
+
+
+@api.representation("application/octet-stream")
+def output_stream(data, code, headers=None):
+    """Makes a Flask response with a bytes body"""
+    resp = make_response(data, code)
+    resp.headers.extend(headers or {})
+    return resp
 
 
 def db_migrate():
