@@ -7,8 +7,8 @@ import requests
 
 
 def get_users():
-    products = AppUser.query.filter_by(deleted=False).all()
-    return products
+    users = AppUser.query.filter_by(deleted=False).all()
+    return users
 
 
 def username_exists(username):
@@ -91,7 +91,7 @@ def update_user(user_dict):
         abort(404, "AppUser not found")
     if "password" in user_dict:
         user_dict["password"] = rbac.get_hashed_password(user_dict["password"])
-    if user_dict.get("agent_request", None) and user.role != "user":
+    if user_dict.get("agent_request", None) and user.user_role != "user":
         user_dict["agent_request"] = False
 
     query.update(user_dict)
@@ -120,6 +120,11 @@ def ban_user(user_id):
     query.update({"banned": True})
     db.session.commit()
     return user
+
+
+def get_agent_requests():
+    users = AppUser.query.filter_by(deleted=False, agent_request=True).all()
+    return users
 
 
 def resolve_agent_request(user_id, approve):
