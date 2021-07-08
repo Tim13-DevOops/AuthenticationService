@@ -53,6 +53,13 @@ class BanUserAPI(Resource):
         return jsonify(user_service.ban_user(user_id))
 
 
+class AgentRequestAPI(Resource):
+    method_decorators = [rbac.Allow(["admin"])]
+
+    def get(self):
+        return jsonify(user_service.get_agent_requests())
+
+
 class ResolveAgentRequestAPI(Resource):
     method_decorators = [rbac.Allow(["admin"])]
 
