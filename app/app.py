@@ -54,7 +54,7 @@ from app.api.user_api import (
     LoginAPI,
     BanUserAPI,
     ResolveAgentRequestAPI,
-    AgentRequestAPI
+    AgentRequestAPI,
 )
 from app.repository.user import populate_admins
 

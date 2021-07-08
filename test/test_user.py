@@ -195,7 +195,6 @@ def test_get_agent_requests_happy(client):
     result = client.get("/agent_request", headers=headers)
     assert result.status_code == 200
     assert len(result.json) == 1
-    
 
 
 def test_resolve_agent_request_happy(client):

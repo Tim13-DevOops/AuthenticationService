@@ -15,11 +15,7 @@ def handle_generic_exception(error):
 
     response = Response()
     response.data = json.dumps(
-        {
-            "code": 500,
-            "name": "Internal server error",
-            "messeage": f"{error}"
-        }
+        {"code": 500, "name": "Internal server error", "messeage": f"{error}"}
     )
     response.status_code = 500
     response.content_type = "application/json"
