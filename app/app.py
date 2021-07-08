@@ -54,12 +54,14 @@ from app.api.user_api import (
     LoginAPI,
     BanUserAPI,
     ResolveAgentRequestAPI,
+    AgentRequestAPI,
 )
 from app.repository.user import populate_admins
 
 api.add_resource(UserAPI, "/user")
 api.add_resource(LoginAPI, "/login")
 api.add_resource(BanUserAPI, "/user/<int:user_id>/ban")
+api.add_resource(AgentRequestAPI, "/agent_request")
 api.add_resource(ResolveAgentRequestAPI, "/user/<int:user_id>/agent_request")
 
 from app.prometheus_metrics.prometheus_metrics import (

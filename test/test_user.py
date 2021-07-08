@@ -185,6 +185,18 @@ def test_ban_user_sad(client):
     assert result.status_code == 404
 
 
+def test_get_agent_requests_happy(client):
+    # first log in as admin
+    login_data = {"username": "TestUsername2", "password": "TestPassword1"}
+    token = client.post(
+        "/login", data=json.dumps(login_data), content_type="application/json"
+    ).json
+    headers = {"Authorization": f"Bearer {token}"}
+    result = client.get("/agent_request", headers=headers)
+    assert result.status_code == 200
+    assert len(result.json) == 1
+
+
 def test_resolve_agent_request_happy(client):
     # first log in as admin
     login_data = {"username": "TestUsername2", "password": "TestPassword1"}

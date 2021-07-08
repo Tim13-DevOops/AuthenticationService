@@ -11,12 +11,11 @@ logger = logging.getLogger()
 
 def handle_generic_exception(error):
 
+    logger.error(error)
+
     response = Response()
     response.data = json.dumps(
-        {
-            "code": 500,
-            "name": "Internal server error",
-        }
+        {"code": 500, "name": "Internal server error", "messeage": f"{error}"}
     )
     response.status_code = 500
     response.content_type = "application/json"
